@@ -50,6 +50,16 @@ public class StubPersister implements StubLifecycleListener, MappingsLoaderExten
     }
   }
 
+  /**
+   * Updates an existing stub mapping in the MongoDB collection.
+   *
+   * <p>This method converts the updated stub mapping to JSON and replaces the document 
+   * corresponding to the old stub mapping. The ID from the old stub is used to construct the 
+   * filter for locating the record to update.</p>
+   *
+   * @param oldStub the original stub mapping before the edit, whose ID is used to locate the existing record
+   * @param newStub the updated stub mapping to replace the old mapping
+   */
   @Override
   public void afterStubEdited(StubMapping oldStub, StubMapping newStub) {
     String json = Json.write(newStub);
@@ -58,6 +68,14 @@ public class StubPersister implements StubLifecycleListener, MappingsLoaderExten
     database.getCollection(STUBS).findOneAndReplace(filter, Document.parse(json));
   }
 
+  /**
+   * Removes the document associated with the given stub mapping from the MongoDB collection.
+   *
+   * <p>This method constructs a filter using the stub mapping's identifier and deletes the corresponding
+   * document from the database.
+   *
+   * @param stubMapping the stub mapping that has been removed
+   */
   @Override
   public void afterStubRemoved(StubMapping stubMapping) {
     Document filter = new Document();
@@ -65,6 +83,12 @@ public class StubPersister implements StubLifecycleListener, MappingsLoaderExten
     database.getCollection(STUBS).deleteOne(filter);
   }
 
+  /**
+   * Resets all stub mappings by deleting every document in the MongoDB collection.
+   *
+   * <p>This method applies a wildcard filter on the "id" field to remove all stub mapping
+   * entries from the collection, effectively clearing the current state.
+   */
   @Override
   public void afterStubsReset() {
     Document filter = new Document();
