@@ -18,6 +18,7 @@ import org.bson.Document;
 
 public class StubPersister implements StubLifecycleListener, MappingsLoaderExtension {
 
+  public static final String ID = "id";
   MongoDatabase database;
 
   private final List<UUID> persistedStubsAtStartup = new ArrayList<>();
@@ -53,21 +54,21 @@ public class StubPersister implements StubLifecycleListener, MappingsLoaderExten
   public void afterStubEdited(StubMapping oldStub, StubMapping newStub) {
     String json = Json.write(newStub);
     Document filter = new Document();
-    filter.put("id", oldStub.getId().toString());
+    filter.put(ID, oldStub.getId().toString());
     database.getCollection(STUBS).findOneAndReplace(filter, Document.parse(json));
   }
 
   @Override
   public void afterStubRemoved(StubMapping stubMapping) {
     Document filter = new Document();
-    filter.put("id", stubMapping.getId().toString());
+    filter.put(ID, stubMapping.getId().toString());
     database.getCollection(STUBS).deleteOne(filter);
   }
 
   @Override
   public void afterStubsReset() {
     Document filter = new Document();
-    filter.put("id", "*");
+    filter.put(ID, "*");
     database.getCollection(STUBS).deleteMany(filter); // all
   }
 
